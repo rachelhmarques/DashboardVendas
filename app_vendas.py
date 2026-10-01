@@ -80,9 +80,15 @@ else:
 # --- GRÁFICOS ---
 st.subheader(f"📊 Painel de Gráficos ({len(df_filtrado)} registros encontrados)")
 
-# Agora temos os 6 gráficos que você pediu!
-aba1, aba2, aba3, aba4, aba5, aba6 = st.tabs([
-    "📊 Colunas", "📈 Linhas", "🍕 Pizza", "🌌 Dispersão", "📦 Boxplot", "🔥 Heatmap"
+if not df_filtrado.empty:
+    col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
+    col_kpi1.metric("Vendas Totais", f"R$ {df_filtrado['Vendas'].sum():,.2f}")
+    col_kpi2.metric("Lucro Total", f"R$ {df_filtrado['Lucro'].sum():,.2f}")
+    col_kpi3.metric("Ticket Médio (Venda)", f"R$ {df_filtrado['Vendas'].mean():,.2f}")
+st.divider()
+
+aba1, aba2, aba3, aba4, aba5, aba6, aba7, aba8 = st.tabs([
+    "📊 Colunas", "📈 Linhas", "🍕 Pizza", "🌌 Dispersão", "📦 Boxplot", "🔥 Heatmap", "📏 Histograma", "📚 Empilhadas"
 ])
 
 # Importante: A partir daqui, todos os gráficos usarão o 'df_filtrado' para respeitar o filtro da lateral.
@@ -132,5 +138,31 @@ with aba6:
         pivot = df_filtrado.pivot_table(index='Categoria', columns='Regiao', values='Vendas', aggfunc='sum')
         fig_heatmap = px.imshow(pivot, text_auto='.2f', aspect="auto", color_continuous_scale='YlOrRd', labels={'color':'Vendas'})
         st.plotly_chart(fig_heatmap, use_container_width=True)
+    else:
+        st.warning("Nenhum dado encontrado nesse período.")
+
+
+with aba7:
+    st.write("### Distribuição do Volume de Vendas (Histograma)")
+    st.write("Entenda em quais faixas de valor as suas vendas mais acontecem.")
+    if not df_filtrado.empty:
+        fig_hist = px.histogram(df_filtrado, x='Vendas', nbins=15, color='Regiao', text_auto=True)
+        fig_hist.update_layout(bargap=0.1)
+        st.plotly_chart(fig_hist, use_container_width=True)
+    else:
+        st.warning("Nenhum dado encontrado nesse período.")
+
+with aba8:
+    st.write("### Barras Empilhadas 100% (Market Share)")
+    st.write("Acompanhe o domínio de cada Categoria no faturamento ao longo do tempo.")
+    if not df_filtrado.empty:
+        # Copia localmente e extrai mes-ano
+        df_tmp = df_filtrado.copy()
+        df_tmp['Mes_Ano'] = df_tmp['Data'].dt.strftime('%Y-%m')
+        df_empilhado = df_tmp.groupby(['Mes_Ano', 'Categoria'], as_index=False)['Vendas'].sum()
+        
+        # Para barras 100%, é legal usar barmode ou apenas stack (padrão)
+        fig_stacked = px.bar(df_empilhado, x='Mes_Ano', y='Vendas', color='Categoria', text_auto='.0f')
+        st.plotly_chart(fig_stacked, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")
