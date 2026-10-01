@@ -64,7 +64,8 @@ filtro_data = st.sidebar.date_input(
     "Selecione o Período",
     [data_min, data_max],
     min_value=data_min,
-    max_value=data_max
+    max_value=data_max,
+    format="DD/MM/YYYY"
 )
 
 # Verificação para evitar erros caso a pessoa esteja escolhendo apenas 1 data
