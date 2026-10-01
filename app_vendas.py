@@ -120,6 +120,7 @@ with aba2:
     df_linhas = df_filtrado.groupby('Data', as_index=False)['Vendas'].sum()
     if not df_linhas.empty:
         fig_line = px.line(df_linhas, x='Data', y='Vendas', markers=True, line_shape="spline")
+        fig_line.update_xaxes(tickformat="%d/%m/%Y")
         st.plotly_chart(fig_line, use_container_width=True)
         
         st.divider()
@@ -127,6 +128,7 @@ with aba2:
         st.write("### Evolução das Vendas por Região")
         df_linhas_regiao = df_filtrado.groupby(['Data', 'Regiao'], as_index=False)['Vendas'].sum()
         fig_line_regiao = px.line(df_linhas_regiao, x='Data', y='Vendas', color='Regiao', markers=True, line_shape="spline")
+        fig_line_regiao.update_xaxes(tickformat="%d/%m/%Y")
         st.plotly_chart(fig_line_regiao, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")
@@ -178,7 +180,7 @@ with aba8:
     if not df_filtrado.empty:
         # Copia localmente e extrai mes-ano
         df_tmp = df_filtrado.copy()
-        df_tmp['Mes_Ano'] = df_tmp['Data'].dt.strftime('%Y-%m')
+        df_tmp['Mes_Ano'] = df_tmp['Data'].dt.strftime('%m/%Y')
         df_empilhado = df_tmp.groupby(['Mes_Ano', 'Categoria'], as_index=False)['Vendas'].sum()
         
         # Para barras 100%, é legal usar barmode ou apenas stack (padrão)
