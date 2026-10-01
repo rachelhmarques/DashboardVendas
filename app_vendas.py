@@ -68,13 +68,22 @@ filtro_data = st.sidebar.date_input(
     format="DD/MM/YYYY"
 )
 
-# Verificação para evitar erros caso a pessoa esteja escolhendo apenas 1 data
+# Filtro de Região na barra lateral
+regioes_disponiveis = df_editado['Regiao'].unique().tolist()
+filtro_regiao = st.sidebar.multiselect(
+    "Selecione as Regiões",
+    options=regioes_disponiveis,
+    default=regioes_disponiveis
+)
+
+# Cortar o dataframe com base nas datas e regiões selecionadas
 if len(filtro_data) == 2:
     data_inicio, data_fim = filtro_data
-    # Cortar o dataframe com base nas datas!
-    df_filtrado = df_editado[(df_editado['Data'].dt.date >= data_inicio) & (df_editado['Data'].dt.date <= data_fim)]
+    df_filtrado = df_editado[(df_editado['Data'].dt.date >= data_inicio) & 
+                             (df_editado['Data'].dt.date <= data_fim) &
+                             (df_editado['Regiao'].isin(filtro_regiao))]
 else:
-    df_filtrado = df_editado
+    df_filtrado = df_editado[df_editado['Regiao'].isin(filtro_regiao)]
 
 
 # --- GRÁFICOS ---
