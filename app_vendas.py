@@ -125,13 +125,12 @@ with aba5:
         st.plotly_chart(fig_box, use_container_width=True)
 
 with aba6:
-    st.write("### Correlação Financeira (Heatmap)")
-    st.write("Cruzamento matemático entre custo, vendas e lucro no período selecionado.")
+    st.write("### Concentração de Vendas (Heatmap)")
+    st.write("Veja de forma fácil onde vendemos mais: cruzamento de Categorias por Região. Cores mais fortes = mais vendas!")
     if not df_filtrado.empty:
-        colunas_numericas = df_filtrado.select_dtypes(include=[np.number]).columns
-        if len(colunas_numericas) > 1:
-            matriz = df_filtrado[colunas_numericas].corr()
-            fig_heatmap = px.imshow(matriz, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
-            st.plotly_chart(fig_heatmap, use_container_width=True)
-        else:
-            st.warning("Poucos dados matemáticos para gerar a matriz.")
+        # Tabela dinâmica
+        pivot = df_filtrado.pivot_table(index='Categoria', columns='Regiao', values='Vendas', aggfunc='sum')
+        fig_heatmap = px.imshow(pivot, text_auto='.2f', aspect="auto", color_continuous_scale='YlOrRd', labels={'color':'Vendas'})
+        st.plotly_chart(fig_heatmap, use_container_width=True)
+    else:
+        st.warning("Nenhum dado encontrado nesse período.")
