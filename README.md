@@ -6,8 +6,8 @@ Este é um pequeno aplicativo em Python usando a biblioteca **Streamlit** para l
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/SEU_USUARIO/Dashboard-Vendas.git
-   cd Dashboard-Vendas
+   git clone https://github.com/rachelhmarques/DashboardVendas.git
+   cd DashboardVendas
    ```
 
 2. **Instale as dependências:**
@@ -24,8 +24,7 @@ Este é um pequeno aplicativo em Python usando a biblioteca **Streamlit** para l
 ## 📁 Estrutura do Projeto
 
 * `app_vendas.py` - O código principal da aplicação em Streamlit.
-* `vendas.csv` - O arquivo que simula nosso banco de dados.
-* `DashboardVendas.html` - Um exemplo de bônus usando apenas HTML/JS e Chart.js.
+* `vendas_avancado.csv` - O arquivo que simula nosso banco de dados.
 * `requirements.txt` - Lista de dependências do Python.
 
 ## 🛠️ Tecnologias Utilizadas
