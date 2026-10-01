@@ -90,10 +90,14 @@ else:
 st.subheader(f"📊 Painel de Gráficos ({len(df_filtrado)} registros encontrados)")
 
 if not df_filtrado.empty:
+    # Função simples para formatar no padrão brasileiro (1.000,00)
+    def formata_br(valor):
+        return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        
     col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
-    col_kpi1.metric("Vendas Totais", f"R$ {df_filtrado['Vendas'].sum():,.2f}")
-    col_kpi2.metric("Lucro Total", f"R$ {df_filtrado['Lucro'].sum():,.2f}")
-    col_kpi3.metric("Ticket Médio (Venda)", f"R$ {df_filtrado['Vendas'].mean():,.2f}")
+    col_kpi1.metric("Vendas Totais", f"R$ {formata_br(df_filtrado['Vendas'].sum())}")
+    col_kpi2.metric("Lucro Total", f"R$ {formata_br(df_filtrado['Lucro'].sum())}")
+    col_kpi3.metric("Ticket Médio (Venda)", f"R$ {formata_br(df_filtrado['Vendas'].mean())}")
 st.divider()
 
 aba1, aba2, aba3, aba4, aba5, aba6, aba7, aba8 = st.tabs([
