@@ -172,6 +172,7 @@ with aba8:
         
         # Para barras 100%, é legal usar barmode ou apenas stack (padrão)
         fig_stacked = px.bar(df_empilhado, x='Mes_Ano', y='Vendas', color='Categoria', text_auto='.0f')
+        fig_stacked.update_xaxes(type='category')
         st.plotly_chart(fig_stacked, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")
