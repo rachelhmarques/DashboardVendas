@@ -116,11 +116,18 @@ with aba1:
         st.warning("Nenhum dado encontrado nesse período.")
 
 with aba2:
-    st.write("### Evolução das Vendas no Período")
+    st.write("### Evolução das Vendas no Período (Consolidado)")
     df_linhas = df_filtrado.groupby('Data', as_index=False)['Vendas'].sum()
     if not df_linhas.empty:
         fig_line = px.line(df_linhas, x='Data', y='Vendas', markers=True, line_shape="spline")
         st.plotly_chart(fig_line, use_container_width=True)
+        
+        st.divider()
+        
+        st.write("### Evolução das Vendas por Região")
+        df_linhas_regiao = df_filtrado.groupby(['Data', 'Regiao'], as_index=False)['Vendas'].sum()
+        fig_line_regiao = px.line(df_linhas_regiao, x='Data', y='Vendas', color='Regiao', markers=True, line_shape="spline")
+        st.plotly_chart(fig_line_regiao, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")
 
