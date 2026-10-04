@@ -13,6 +13,10 @@ st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3003/3003309.png", widt
 st.sidebar.title("🔍 Filtros de Análise")
 st.sidebar.markdown("Use as opções abaixo para interagir com os gráficos.")
 
+if st.sidebar.button("🔄 Atualizar Dados"):
+    carregar_dados_da_api.clear()
+
+
 # Carregamos as senhas do arquivo .env (que não vai para o GitHub)
 from dotenv import load_dotenv
 load_dotenv()
