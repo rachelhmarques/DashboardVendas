@@ -1,0 +1,442 @@
+<!--
+ ============================================================================
+ PROJETO TCC: Front-end Secundário (Google Sites / WebApp)
+ ARQUIVO: Dashboard.html
+ AUTORIA: Rachel H. Marques
+ DESCRIÇÃO: Interface de usuário e gráficos nativos em HTML/JS/CSS.
+ ============================================================================
+-->
+
+<style>
+  /* Usando variáveis do Bootstrap para adaptar ao tema Claro/Escuro automaticamente */
+  .painel-box { 
+    background-color: var(--bs-body-bg); 
+    color: var(--bs-body-color);
+    padding: 20px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    margin-bottom: 20px; 
+    border: 1px solid var(--bs-border-color);
+  }
+  .kpi-card { text-align: center; margin-bottom: 15px;}
+  .kpi-title { font-size: 13px; font-weight: 600; text-transform: uppercase; opacity: 0.7;}
+  .kpi-value { font-size: 24px; font-weight: bold; }
+  .plot-div { height: 400px; width: 100%; }
+</style>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 border-bottom pb-2">
+    <h2 class="mb-3 mb-md-0 text-center">📊 Dashboard de Vendas</h2>
+    
+    <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 justify-content-center">
+      <!-- Badge de Permissão -->
+      <span class="badge bg-success" id="badge-acesso">Acesso Liberado</span>
+      
+      <!-- Botão Solicitar PDF que abre Modal -->
+      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPDF">📩 Enviar PDF</button>
+
+      <!-- Botão Chat IA -->
+      <button class="btn btn-warning btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalChatIA">🤖 Assistente IA</button>
+
+      <!-- Toggle de Tema -->
+      <div class="form-check form-switch fs-5">
+        <input class="form-check-input" type="checkbox" role="switch" id="toggle-tema" onchange="alternarTema()">
+        <label class="form-check-label fs-6" for="toggle-tema">🌙 Escuro</label>
+      </div>
+        <!-- Botão Atualizar -->
+        <button class="btn btn-outline-info btn-sm me-2" onclick="carregarDados()">🔄 Atualizar</button>
+
+        
+      
+      <!-- Botão de Sair -->
+      <button class="btn btn-outline-danger btn-sm" onclick="sairApp()">🚪 Sair</button>
+    </div>
+  </div>
+  
+  <div class="row">
+    <!-- BARRA LATERAL (Filtros) -->
+    <div class="col-lg-3 col-md-4">
+      <div class="painel-box">
+        <h5 class="mb-3">Filtros</h5>
+        
+        <label class="form-label fw-bold">Período</label>
+        <input type="date" id="filtro-data-inicio" class="form-control mb-2" onchange="aplicarFiltros()">
+        <input type="date" id="filtro-data-fim" class="form-control mb-4" onchange="aplicarFiltros()">
+        
+        <label class="form-label fw-bold">Regiões Permitidas</label>
+        <div id="container-regioes" class="mb-3">
+          <!-- Checkboxes dinâmicos -->
+        </div>
+        
+        <div id="loading" class="text-primary fw-bold">Baixando dados seguros...</div>
+      </div>
+    </div>
+    
+    <!-- ÁREA PRINCIPAL -->
+    <div class="col-lg-9 col-md-8" id="area-principal" style="display:none;">
+      
+      <!-- KPIs -->
+      <div class="row">
+        <div class="col-md-4"><div class="painel-box kpi-card"><div class="kpi-title">Vendas Totais</div><div class="kpi-value" id="kpi-vendas">R$ 0,00</div></div></div>
+        <div class="col-md-4"><div class="painel-box kpi-card"><div class="kpi-title">Lucro Total</div><div class="kpi-value" id="kpi-lucro">R$ 0,00</div></div></div>
+        <div class="col-md-4"><div class="painel-box kpi-card"><div class="kpi-title">Ticket Médio</div><div class="kpi-value" id="kpi-ticket">R$ 0,00</div></div></div>
+      </div>
+      
+      <!-- ABAS -->
+      <ul class="nav nav-tabs mt-3" id="myTab" role="tablist" style="overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 5px;">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#aba1">📊 Colunas</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba2">📈 Linhas</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba3">🍕 Pizza</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba4">🌌 Dispersão</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba5">📦 Boxplot</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba6">🔥 Mapa</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba7">📏 Histograma</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aba8">📚 Empilhadas</button></li>
+      </ul>
+      
+      <!-- CONTEÚDO DAS ABAS -->
+      <div class="tab-content mt-3" id="myTabContent">
+        <div class="tab-pane fade show active" id="aba1"><div class="painel-box"><div id="grafico1" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba2"><div class="painel-box"><div id="grafico2a" class="plot-div mb-4"></div><div id="grafico2b" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba3"><div class="painel-box"><div id="grafico3" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba4"><div class="painel-box"><div id="grafico4" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba5"><div class="painel-box"><div id="grafico5" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba6"><div class="painel-box"><div id="grafico6" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba7"><div class="painel-box"><div id="grafico7" class="plot-div"></div></div></div>
+        <div class="tab-pane fade" id="aba8"><div class="painel-box"><div id="grafico8" class="plot-div"></div></div></div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal Envio PDF -->
+<div class="modal fade" id="modalPDF" tabindex="-1" aria-labelledby="modalPDFLabel" aria-hidden="true" data-bs-theme="light">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPDFLabel">📩 Enviar Relatório em PDF</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label text-dark">Email Principal (Para)</label>
+          <input type="email" class="form-control" id="pdf-email" placeholder="nome@email.com">
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-dark">Cópia (CC)</label>
+          <input type="email" class="form-control" id="pdf-cc" placeholder="copia@email.com (opcional)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="confirmarEnvioPDF()" id="btn-confirmar-pdf">Enviar Agora</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Chat IA Groq -->
+<div class="modal fade" id="modalChatIA" tabindex="-1" aria-labelledby="modalChatIALabel" aria-hidden="true" data-bs-theme="light">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title text-dark" id="modalChatIALabel">🤖 Assistente IA (OpenRouter)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body bg-light">
+
+        <!-- Area de Historico -->
+        <div id="chat-history" class="p-2 border rounded bg-white" style="height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+          <div class="text-muted text-center" style="font-size: 0.9em;">Pergunte sobre seus dados de Vendas!</div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex">
+        <input type="text" class="form-control" id="groq-pergunta" placeholder="Ex: Qual foi o produto mais vendido no leste?">
+        <button type="button" class="btn btn-success" onclick="enviarPerguntaGroq()" id="btn-enviar-groq">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let dadosOriginais = [];
+  let regioesExistentes = new Set();
+  let temaEscuro = false;
+  let nomeDoUsuarioAtivo = ""; // Guarda o nome do usuário para solicitar o PDF
+  
+  // Função que pede o PDF
+  function confirmarEnvioPDF() {
+    let email = document.getElementById('pdf-email').value;
+    let cc = document.getElementById('pdf-cc').value;
+    
+    if(!email) {
+      alert("Por favor, preencha o E-mail Principal!");
+      return;
+    }
+
+    let btn = document.getElementById('btn-confirmar-pdf');
+    btn.disabled = true;
+    btn.innerText = "⏳ Gerando PDF e Enviando...";
+    
+    google.script.run
+      .withSuccessHandler(function(resp) {
+         alert(resp);
+         btn.disabled = false;
+         btn.innerText = "Enviar Agora";
+         // Tenta fechar o modal
+         var modalEl = document.getElementById('modalPDF');
+         var modal = bootstrap.Modal.getInstance(modalEl);
+         if(modal) modal.hide();
+      })
+      .withFailureHandler(function(err) {
+         alert("Erro: " + err.message);
+         btn.disabled = false;
+         btn.innerText = "Enviar Agora";
+      })
+      .enviarPDFPersonalizado(nomeDoUsuarioAtivo, email, cc);
+  }
+
+  // Lógica do Assistente IA Groq
+  function enviarPerguntaGroq() {
+
+    let inputPergunta = document.getElementById('groq-pergunta').value.trim();
+    
+
+    if (!inputPergunta) { return; }
+    
+    let btn = document.getElementById('btn-enviar-groq');
+    let chat = document.getElementById('chat-history');
+    
+    // Adicionar pergunta ao chat
+    chat.innerHTML += `<div class="p-2 mb-1 bg-primary text-white rounded align-self-end" style="max-width: 80%;"><b>Você:</b> ${inputPergunta}</div>`;
+    document.getElementById('groq-pergunta').value = ""; // Limpa input
+    
+    // Placeholder de carregando
+    let idLoading = "loading-" + Date.now();
+    chat.innerHTML += `<div id="${idLoading}" class="p-2 mb-1 bg-secondary text-white rounded align-self-start" style="max-width: 80%;"><i>⏳ Pensando nos dados...</i></div>`;
+    chat.scrollTop = chat.scrollHeight; // rolar pra baixo
+    
+    btn.disabled = true;
+    
+    google.script.run
+      .withSuccessHandler(function(resp) {
+         document.getElementById(idLoading).remove();
+         chat.innerHTML += `<div class="p-2 mb-1 bg-light text-dark border rounded align-self-start" style="max-width: 80%;"><b>Assistente IA:</b> ${resp}</div>`;
+         chat.scrollTop = chat.scrollHeight;
+         btn.disabled = false;
+      })
+      .withFailureHandler(function(err) {
+         document.getElementById(idLoading).remove();
+         chat.innerHTML += `<div class="p-2 mb-1 bg-danger text-white border rounded align-self-start" style="max-width: 80%;"><b>Erro:</b> Falha ao contactar a IA (${err.message})</div>`;
+         chat.scrollTop = chat.scrollHeight;
+         btn.disabled = false;
+      })
+      .consultarGroq(inputPergunta, nomeDoUsuarioAtivo);
+  }
+
+  // Função de Logout
+  function sairApp() {
+    // Apaga os dados sensíveis da memória
+    dadosOriginais = [];
+    nomeDoUsuarioAtivo = "";
+    document.getElementById('input-usuario').value = "";
+    
+    // Troca as telas
+    document.getElementById('container-dashboard').style.display = 'none';
+    document.getElementById('area-principal').style.display = 'none';
+    document.getElementById('loading').style.display = 'block'; // reset do loading
+    
+    document.getElementById('container-login').style.display = 'block';
+  }
+  
+  // Função para Alternar Modo Claro/Escuro
+  function alternarTema() {
+    temaEscuro = document.getElementById('toggle-tema').checked;
+    document.documentElement.setAttribute('data-bs-theme', temaEscuro ? 'dark' : 'light');
+    if(dadosOriginais.length > 0) aplicarFiltros();
+  }
+
+  // Função acionada pelo Login.html após o sucesso
+  function iniciarCarregamentoDashboard(permissao, usuario) {
+    nomeDoUsuarioAtivo = usuario;
+    document.getElementById('badge-acesso').innerText = "Acesso: " + permissao;
+    
+    // Força o tema iniciar claro
+    document.documentElement.setAttribute('data-bs-theme', 'light');
+    document.getElementById('toggle-tema').checked = false;
+    temaEscuro = false;
+    
+    google.script.run
+      .withSuccessHandler(inicializarDashboard)
+      .obterDadosPlanilhaSeguro(permissao);
+  }
+  
+  function inicializarDashboard(jsonStr) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('area-principal').style.display = 'block';
+    
+    let obj = JSON.parse(jsonStr);
+    if(obj.erro) {
+      alert("Erro ao buscar dados: " + obj.erro);
+      return;
+    }
+    dadosOriginais = obj;
+    
+    if(dadosOriginais.length === 0) {
+      alert("Você não possui dados para visualizar.");
+      return;
+    }
+    
+    let datas = dadosOriginais.map(d => new Date(d.Data));
+    let minDate = new Date(Math.min.apply(null, datas));
+    let maxDate = new Date(Math.max.apply(null, datas));
+    document.getElementById('filtro-data-inicio').value = minDate.toISOString().split('T')[0];
+    document.getElementById('filtro-data-fim').value = maxDate.toISOString().split('T')[0];
+    
+    dadosOriginais.forEach(d => regioesExistentes.add(d.Regiao));
+    let container = document.getElementById('container-regioes');
+    container.innerHTML = "";
+    regioesExistentes.forEach(regiao => {
+      container.innerHTML += `
+        <div class="form-check">
+          <input class="form-check-input filtro-regiao" type="checkbox" value="${regiao}" checked onchange="aplicarFiltros()">
+          <label class="form-check-label">${regiao}</label>
+        </div>
+      `;
+    });
+    
+    aplicarFiltros();
+  }
+  
+  function aplicarFiltros() {
+    let dtInicio = new Date(document.getElementById('filtro-data-inicio').value);
+    let dtFim = new Date(document.getElementById('filtro-data-fim').value);
+    dtFim.setHours(23,59,59);
+    
+    let checkboxes = document.querySelectorAll('.filtro-regiao');
+    let regioesSelecionadas = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+    
+    let dadosFiltrados = dadosOriginais.filter(d => {
+      let dt = new Date(d.Data);
+      return dt >= dtInicio && dt <= dtFim && regioesSelecionadas.includes(d.Regiao);
+    });
+    
+    desenharDashboard(dadosFiltrados);
+  }
+  
+  function formatarDinheiro(valor) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+  }
+  
+  function desenharDashboard(dados) {
+    if (dados.length === 0) {
+      document.getElementById('kpi-vendas').innerText = formatarDinheiro(0);
+      document.getElementById('kpi-lucro').innerText = formatarDinheiro(0);
+      document.getElementById('kpi-ticket').innerText = formatarDinheiro(0);
+      return;
+    }
+    
+    let tVendas = 0, tLucro = 0;
+    dados.forEach(d => { tVendas += parseFloat(d.Vendas)||0; tLucro += parseFloat(d.Lucro)||0; });
+    document.getElementById('kpi-vendas').innerText = formatarDinheiro(tVendas);
+    document.getElementById('kpi-lucro').innerText = formatarDinheiro(tLucro);
+    document.getElementById('kpi-ticket').innerText = formatarDinheiro(tVendas / dados.length);
+    
+    // Configurações Globais de Tema para o Plotly
+    let layoutLayoutTema = {
+      paper_bgcolor: 'rgba(0,0,0,0)', 
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: { color: temaEscuro ? '#e9ecef' : '#212529' },
+      margin: {t:30, b:40, l:40, r:20}
+    };
+    
+    function mergeLayout(especifico) {
+      return Object.assign({}, layoutLayoutTema, especifico);
+    }
+    
+    // 1. COLUNAS
+    let somaRegiao = {};
+    dados.forEach(d => { somaRegiao[d.Regiao] = (somaRegiao[d.Regiao] || 0) + (parseFloat(d.Vendas)||0); });
+    Plotly.newPlot('grafico1', [{x: Object.keys(somaRegiao), y: Object.values(somaRegiao), type: 'bar'}], mergeLayout({title: 'Faturamento por Região'}));
+    
+    // 2. LINHAS
+    let somaData = {};
+    dados.forEach(d => {
+        let dt = new Date(d.Data).toISOString().split('T')[0];
+        somaData[dt] = (somaData[dt] || 0) + (parseFloat(d.Vendas)||0); 
+    });
+    let datasOrd = Object.keys(somaData).sort();
+    Plotly.newPlot('grafico2a', [{x: datasOrd, y: datasOrd.map(k=>somaData[k]), type: 'scatter', mode: 'lines+markers'}], mergeLayout({title: 'Evolução Consolidada'}));
+    
+    let tracados = [];
+    let rExist = [...new Set(dados.map(d=>d.Regiao))];
+    rExist.forEach(r => {
+       let sr = {};
+       dados.filter(d=>d.Regiao === r).forEach(d=> { let dt=new Date(d.Data).toISOString().split('T')[0]; sr[dt] = (sr[dt]||0)+(parseFloat(d.Vendas)||0); });
+       let dtOrd = Object.keys(sr).sort();
+       tracados.push({x: dtOrd, y: dtOrd.map(k=>sr[k]), type: 'scatter', mode: 'lines+markers', name: r});
+    });
+    Plotly.newPlot('grafico2b', tracados, mergeLayout({title: 'Evolução por Região'}));
+    
+    // 3. PIZZA
+    let somaCat = {};
+    dados.forEach(d => { somaCat[d.Categoria] = (somaCat[d.Categoria] || 0) + (parseFloat(d.Vendas)||0); });
+    Plotly.newPlot('grafico3', [{labels: Object.keys(somaCat), values: Object.values(somaCat), type: 'pie'}], mergeLayout({title: 'Faturamento por Categoria'}));
+    
+    // 4. DISPERSÃO
+    let cExist = [...new Set(dados.map(d=>d.Categoria))];
+    let scatterTracados = [];
+    cExist.forEach(c => {
+       let dadosC = dados.filter(d=>d.Categoria===c);
+       scatterTracados.push({
+           x: dadosC.map(d=>d.Custo), 
+           y: dadosC.map(d=>d.Vendas), 
+           mode: 'markers', 
+           type: 'scatter', 
+           name: c
+       });
+    });
+    Plotly.newPlot('grafico4', scatterTracados, mergeLayout({title: 'Custo x Venda', xaxis:{title:'Custo'}, yaxis:{title:'Vendas'}}));
+    
+    // 5. BOXPLOT
+    let boxTracados = [];
+    cExist.forEach(c => { boxTracados.push({y: dados.filter(d=>d.Categoria===c).map(d=>d.Vendas), type: 'box', name: c}); });
+    Plotly.newPlot('grafico5', boxTracados, mergeLayout({title: 'Distribuição por Categoria'}));
+    
+    // 6. HEATMAP
+    let heatmapData = [];
+    cExist.forEach(c => {
+       let row = [];
+       rExist.forEach(r => {
+          row.push(dados.filter(d=>d.Categoria===c && d.Regiao===r).reduce((a, b)=> a + (parseFloat(b.Vendas)||0), 0));
+       });
+       heatmapData.push(row);
+    });
+    Plotly.newPlot('grafico6', [{z: heatmapData, x: rExist, y: cExist, type: 'heatmap', colorscale: 'Blues'}], mergeLayout({title: 'Vendas: Categoria x Região', margin: {l: 120, t: 50, b: 50, r: 20}}));
+    
+    // 7. HISTOGRAMA
+    let histTracados = [];
+    cExist.forEach(c => {
+       histTracados.push({
+           x: dados.filter(d=>d.Categoria===c).map(d=>d.Vendas),
+           type: 'histogram',
+           name: c,
+           opacity: 0.7
+       });
+    });
+    Plotly.newPlot('grafico7', histTracados, mergeLayout({title: 'Distribuição de Volume por Categoria', barmode: 'overlay'}));
+    
+    // 8. EMPILHADAS
+    let empilhadoObj = {};
+    dados.forEach(d => {
+       let dt = new Date(d.Data); if (isNaN(dt.getTime())) return; let m = String(dt.getUTCFullYear());
+       if(!empilhadoObj[m]) empilhadoObj[m] = {};
+       empilhadoObj[m][d.Categoria] = (empilhadoObj[m][d.Categoria] || 0) + (parseFloat(d.Vendas)||0);
+    });
+    let mesesOrd = Object.keys(empilhadoObj).sort();
+    let rotulosMes = mesesOrd.slice(); let empTracados = [];
+    cExist.forEach(c => { empTracados.push({x: rotulosMes, y: mesesOrd.map(m => empilhadoObj[m][c] || 0), name: c, type: 'bar'}); });
+    Plotly.newPlot('grafico8', empTracados, mergeLayout({barmode: 'stack', title: 'Vendas Anuais por Categoria', xaxis: {type: 'category'}, yaxis: {title: 'Vendas'}}));
+  }
+</script>

@@ -1,3 +1,25 @@
+"""
+=============================================================================
+PROJETO TCC: Dashboard de Vendas (Cloud-based Analytics)
+=============================================================================
+
+ARQUIVO: app_vendas.py
+DESCRIÇÃO: 
+Este é o front-end principal de análise de dados (Dashboard) desenvolvido
+em Python utilizando a framework Streamlit. 
+
+ARQUITETURA E FLUXO:
+1. Conexão Segura: O app consome uma API externa do Google Apps Script. 
+   Tokens e credenciais estão protegidos via st.secrets e dotenv.
+2. Tratamento de Dados (ETL): Os dados são injetados na biblioteca Pandas,
+   passando por limpeza e padronização (como tratamento de datas timezone-naive).
+3. Componentização: A interface é dividida em Abas Interativas e Filtros Laterais.
+4. Gráficos Plotly: A biblioteca Plotly Express é utilizada para renderização
+   vetorial e reativa em gráficos de barra, linha, pizza, dispersão e caixa.
+
+AUTORIA: Rachel H. Marques
+=============================================================================
+"""
 import streamlit as st
 import pandas as pd
 import numpy as np

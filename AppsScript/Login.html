@@ -1,0 +1,84 @@
+<!--
+ ============================================================================
+ PROJETO TCC: Front-end Secundário (Google Sites / WebApp)
+ ARQUIVO: Login.html
+ AUTORIA: Rachel H. Marques
+ DESCRIÇÃO: Interface de usuário e gráficos nativos em HTML/JS/CSS.
+ ============================================================================
+-->
+
+<style>
+  .login-card {
+    max-width: 400px;
+    margin: 100px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+</style>
+
+<div class="login-card">
+  <h3 class="text-center mb-4">🔐 Acesso Restrito</h3>
+  
+  <div id="mensagem-erro" class="alert alert-danger" style="display:none;"></div>
+  
+  <div class="mb-3">
+    <label class="form-label">Usuário</label>
+    <input type="text" id="input-usuario" class="form-control" placeholder="Ex: rachel">
+  </div>
+  
+  <button class="btn btn-primary w-100" onclick="tentarLogar()">Entrar</button>
+  
+  <div id="spinner-login" class="text-center mt-3" style="display:none;">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Autenticando...</p>
+  </div>
+</div>
+
+<script>
+  // Variável global para guardar a permissão e usuário
+  let permissaoAtiva = "";
+  let usuarioLogado = "";
+
+  function tentarLogar() {
+    let usuarioDigitado = document.getElementById('input-usuario').value;
+    
+    if(!usuarioDigitado) return;
+    
+    // Esconde erro e mostra spinner
+    document.getElementById('mensagem-erro').style.display = 'none';
+    document.getElementById('spinner-login').style.display = 'block';
+    
+    // Chama o Back-end
+    google.script.run
+      .withSuccessHandler(respostaLogin)
+      .withFailureHandler(erroLogin)
+      .validarUsuario(usuarioDigitado);
+  }
+  
+  function respostaLogin(resposta) {
+    document.getElementById('spinner-login').style.display = 'none';
+    
+    if(resposta.erro) {
+      document.getElementById('mensagem-erro').innerText = resposta.erro;
+      document.getElementById('mensagem-erro').style.display = 'block';
+    } else {
+      // Deu certo! Oculta tela de login, e chama os dados do Dashboard!
+      permissaoAtiva = resposta.regiaoLiberada;
+      usuarioLogado = resposta.usuarioNome;
+      
+      document.getElementById('container-login').style.display = 'none';
+      document.getElementById('container-dashboard').style.display = 'block';
+      
+      // Manda buscar os dados enviando a permissão como "chave de segurança"
+      iniciarCarregamentoDashboard(permissaoAtiva, usuarioLogado);
+    }
+  }
+  
+  function erroLogin() {
+    document.getElementById('spinner-login').style.display = 'none';
+    document.getElementById('mensagem-erro').innerText = "Erro ao conectar com o Servidor do Google.";
+    document.getElementById('mensagem-erro').style.display = 'block';
+  }
+</script>

@@ -1,5 +1,4 @@
 {
-  "name": "Formulário de Vendas",
   "nodes": [
     {
       "parameters": {
@@ -7,83 +6,301 @@
         "formDescription": "Preencha os dados da venda realizada.",
         "formFields": {
           "values": [
-            { "fieldLabel": "Data", "fieldType": "date", "requiredField": true },
+            {
+              "fieldLabel": "Data",
+              "fieldType": "date",
+              "requiredField": true
+            },
             {
               "fieldLabel": "Categoria",
               "fieldType": "dropdown",
-              "requiredField": true,
               "fieldOptions": {
                 "values": [
-                  { "option": "Roupas" },
-                  { "option": "Alimentos" },
-                  { "option": "Eletrônicos" },
-                  { "option": "Móveis" }
+                  {
+                    "option": "Roupas"
+                  },
+                  {
+                    "option": "Alimentos"
+                  },
+                  {
+                    "option": "Eletrônicos"
+                  },
+                  {
+                    "option": "Móveis"
+                  }
                 ]
-              }
+              },
+              "requiredField": true
             },
             {
               "fieldLabel": "Região",
               "fieldType": "dropdown",
-              "requiredField": true,
               "fieldOptions": {
                 "values": [
-                  { "option": "Leste" },
-                  { "option": "Oeste" },
-                  { "option": "Norte" },
-                  { "option": "Sul" }
+                  {
+                    "option": "Leste"
+                  },
+                  {
+                    "option": "Oeste"
+                  },
+                  {
+                    "option": "Norte"
+                  },
+                  {
+                    "option": "Sul"
+                  }
                 ]
-              }
+              },
+              "requiredField": true
             },
-            { "fieldLabel": "Custo", "fieldType": "number", "requiredField": true },
-            { "fieldLabel": "Vendas", "fieldType": "number", "requiredField": true }
+            {
+              "fieldLabel": "Custo",
+              "fieldType": "number",
+              "defaultValue": "0,00",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Vendas",
+              "fieldType": "number",
+              "defaultValue": "0,00",
+              "requiredField": true
+            }
           ]
         },
         "options": {}
       },
-      "id": "a1f0c0de-0001-4000-8000-000000000001",
+      "id": "f83e1895-472b-4eb1-b85a-81e511c96ded",
       "name": "Formulário",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
-      "position": [0, 0]
+      "position": [
+        -112,
+        32
+      ],
+      "webhookId": "0f2715f2-bb26-4ca2-85e8-a87a08fd5cbd"
     },
     {
       "parameters": {
         "jsCode": "const j = $input.first().json;\nconst custo = Number(j['Custo']);\nconst vendas = Number(j['Vendas']);\nconst data = new Date(j['Data']);\nconst erros = [];\n\nif (isNaN(data.getTime())) erros.push('Data inválida.');\nelse if (data.getFullYear() < 2000 || data > new Date()) erros.push('Data fora do intervalo permitido (2000 até hoje).');\nif (!(custo >= 0)) erros.push('Custo deve ser um número maior ou igual a zero.');\nif (!(vendas > 0)) erros.push('Vendas deve ser um número maior que zero.');\n\nif (erros.length) throw new Error('Registro recusado: ' + erros.join(' '));\n\nconst iso = data.toISOString().slice(0, 10);\nreturn [{ json: {\n  Data: iso,\n  Categoria: j['Categoria'],\n  Regiao: j['Região'],\n  Custo: Number(custo.toFixed(2)),\n  Vendas: Number(vendas.toFixed(2)),\n  Lucro: Number((vendas - custo).toFixed(2))\n}}];"
       },
-      "id": "a1f0c0de-0002-4000-8000-000000000002",
+      "id": "24b13bc9-8be9-46af-9fa5-10dcdbe89406",
       "name": "Validar e calcular lucro",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [260, 0]
+      "position": [
+        224,
+        32
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "__rl": true, "value": "COLE_AQUI_O_ID_DA_PLANILHA", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "vendas", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "1ZgVAZbdvceX8GAeTTYpfKWkoDrn_mf-glw9R5w9rHiY",
+          "mode": "list",
+          "cachedResultName": "Dashboard de Vendas - Data14",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZgVAZbdvceX8GAeTTYpfKWkoDrn_mf-glw9R5w9rHiY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 786265166,
+          "mode": "list",
+          "cachedResultName": "vendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZgVAZbdvceX8GAeTTYpfKWkoDrn_mf-glw9R5w9rHiY/edit#gid=786265166"
+        },
         "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Data": "={{ $json.Data }}",
-            "Categoria": "={{ $json.Categoria }}",
-            "Regiao": "={{ $json.Regiao }}",
-            "Custo": "={{ $json.Custo }}",
-            "Vendas": "={{ $json.Vendas }}",
-            "Lucro": "={{ $json.Lucro }}"
-          }
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Regiao",
+              "displayName": "Regiao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Custo",
+              "displayName": "Custo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Vendas",
+              "displayName": "Vendas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lucro",
+              "displayName": "Lucro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
-      "id": "a1f0c0de-0003-4000-8000-000000000003",
+      "id": "00eb7362-5d2c-4a1f-b49c-058aaa23c928",
       "name": "Gravar na aba vendas",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [520, 0]
+      "position": [
+        640,
+        32
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SAKVhHyv2Nsonchc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.Lucro }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              },
+              "id": "fc8525cf-06e0-48c5-9b3a-92e7ec0d50ff"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9c251cd6-d4bd-4d6b-9d4a-14e2385735b3",
+      "name": "Lucro negativo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "-5324529584",
+        "text": "=Venda com prejuízo registrada\nData: {{ $json.Data }}\nCategoria: {{ $json.Categoria }}\nRegião: {{ $json.Regiao }}\nCusto: {{ $json.Custo }}\nVendas: {{ $json.Vendas }}\nLucro: {{ $json.Lucro }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "5c884e7e-557e-4368-9670-39f9d1dafd55",
+      "name": "Avisar prejuízo no Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        128
+      ],
+      "webhookId": "f41492e6-99b8-4205-adcb-7785c359568b",
+      "credentials": {
+        "telegramApi": {
+          "id": "Hl4hrNApaRDzUKpC",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "connections": {
-    "Formulário": { "main": [[{ "node": "Validar e calcular lucro", "type": "main", "index": 0 }]] },
-    "Validar e calcular lucro": { "main": [[{ "node": "Gravar na aba vendas", "type": "main", "index": 0 }]] }
+    "Formulário": {
+      "main": [
+        [
+          {
+            "node": "Validar e calcular lucro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar e calcular lucro": {
+      "main": [
+        [
+          {
+            "node": "Gravar na aba vendas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lucro negativo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar na aba vendas": {
+      "main": [
+        []
+      ]
+    },
+    "Lucro negativo?": {
+      "main": [
+        [
+          {
+            "node": "Avisar prejuízo no Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" }
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "26183377b530108a5a6422840befae10d42071a6cf94f3571b9c87ee337592ba"
+  }
 }
