@@ -37,6 +37,10 @@ def carregar_dados_da_api():
 # Carregando o banco de dados direto do Google Sheets via nossa API!
 df = carregar_dados_da_api()
 
+if df.empty:
+    st.error('O Banco de Dados est vazio ou inacessvel.')
+    st.stop()
+
 if not df.empty:
     # A base de dados do Apps Script pode vir com strings misturadas. Garantimos que é datetime
     df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
