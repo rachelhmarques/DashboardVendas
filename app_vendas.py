@@ -4,6 +4,8 @@ import numpy as np
 import plotly.express as px
 import os
 
+import requests
+
 st.set_page_config(page_title="Dashboard de Vendas", layout="wide", page_icon="📈")
 
 # --- BARRA LATERAL (FILTROS) ---
@@ -11,50 +13,54 @@ st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3003/3003309.png", widt
 st.sidebar.title("🔍 Filtros de Análise")
 st.sidebar.markdown("Use as opções abaixo para interagir com os gráficos.")
 
-ARQUIVO_CSV = 'vendas_avancado.csv'
+# Carregamos as senhas do arquivo .env (que não vai para o GitHub)
+from dotenv import load_dotenv
+load_dotenv()
 
-# Se o arquivo não existir, criamos um
-if not os.path.exists(ARQUIVO_CSV):
-    np.random.seed(42)
-    datas = pd.date_range(start='2023-01-01', periods=100)
-    categorias = np.random.choice(['Eletrônicos', 'Móveis', 'Roupas', 'Alimentos'], size=100)
-    regioes = np.random.choice(['Norte', 'Sul', 'Leste', 'Oeste'], size=100)
-    custo = np.random.uniform(50, 500, size=100)
-    vendas = custo * np.random.uniform(1.2, 2.5, size=100) 
-    lucro = vendas - custo
-    
-    df_inicial = pd.DataFrame({
-        'Data': datas,
-        'Categoria': categorias,
-        'Regiao': regioes,
-        'Custo': custo.round(2),
-        'Vendas': vendas.round(2),
-        'Lucro': lucro.round(2)
-    })
-    df_inicial.to_csv(ARQUIVO_CSV, index=False)
+URL_API = os.getenv("URL_API")
+TOKEN = os.getenv("API_TOKEN")
 
-# Carregando o banco de dados
-df = pd.read_csv(ARQUIVO_CSV)
-df['Data'] = pd.to_datetime(df['Data'])
+@st.cache_data(ttl=60) # Faz cache de 1 minuto para não bombardear o Google
+def carregar_dados_da_api():
+    try:
+        response = requests.get(f"{URL_API}?api=true&token={TOKEN}")
+        if response.status_code == 200:
+            dados = response.json()
+            if isinstance(dados, dict) and "erro" in dados:
+                st.error(f"Erro da API: {dados['erro']}")
+                return pd.DataFrame()
+            return pd.DataFrame(dados)
+    except Exception as e:
+        st.error(f"Falha de conexão: {e}")
+    return pd.DataFrame()
+
+# Carregando o banco de dados direto do Google Sheets via nossa API!
+df = carregar_dados_da_api()
+
+if not df.empty:
+    # A base de dados do Apps Script pode vir com strings misturadas. Garantimos que é datetime
+    df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+    # Opcional: Converter colunas de valor para float se vierem como string com aspas simples (como fiz no gerador)
+    for col in ['Custo', 'Vendas', 'Lucro']:
+        if col in df.columns:
+            # Limpa aspas e vírgulas, depois força a ser número. Valores bizarros viram NaN (Em branco)
+            serie_limpa = df[col].astype(str).str.replace("'", "").str.replace(",", ".")
+            df[col] = pd.to_numeric(serie_limpa, errors='coerce')
 
 # --- TELA PRINCIPAL ---
 st.title("📈 Dashboard Completo de Vendas")
 
-st.subheader("📋 Banco de Dados (Editável)")
-st.write("Altere os valores na tabela abaixo e clique em Salvar. As mudanças afetam os gráficos em tempo real.")
+st.subheader("📋 Banco de Dados Conectado")
+st.write("Estes dados estão vindo em tempo real da nuvem (Google Sheets).")
 
-# Mostrar o editor de dados (o banco completo)
-df_editado = st.data_editor(df, num_rows="dynamic", use_container_width=True, height=200)
-
-if st.button("💾 Salvar Alterações no Banco"):
-    df_editado.to_csv(ARQUIVO_CSV, index=False)
-    st.success("Dados salvos com sucesso!")
+# Apenas exibir
+st.dataframe(df, use_container_width=True, height=200)
 
 st.divider()
 
 # --- FILTRANDO OS DADOS ---
-# Garantir que a coluna 'Data' do df_editado seja do tipo datetime
-df_editado['Data'] = pd.to_datetime(df_editado['Data'])
+# Usar a variável df original em vez da df_editado
+df_editado = df.copy()
 
 data_min = df_editado['Data'].min().date()
 data_max = df_editado['Data'].max().date()
@@ -76,14 +82,24 @@ filtro_regiao = st.sidebar.multiselect(
     default=regioes_disponiveis
 )
 
-# Cortar o dataframe com base nas datas e regiões selecionadas
+# Filtro de Categoria na barra lateral
+categorias_disponiveis = df_editado['Categoria'].unique().tolist()
+filtro_categoria = st.sidebar.multiselect(
+    "Selecione as Categorias",
+    options=categorias_disponiveis,
+    default=categorias_disponiveis
+)
+
+# Cortar o dataframe com base nas datas, regiões e categorias selecionadas
 if len(filtro_data) == 2:
     data_inicio, data_fim = filtro_data
     df_filtrado = df_editado[(df_editado['Data'].dt.date >= data_inicio) & 
                              (df_editado['Data'].dt.date <= data_fim) &
-                             (df_editado['Regiao'].isin(filtro_regiao))]
+                             (df_editado['Regiao'].isin(filtro_regiao)) &
+                             (df_editado['Categoria'].isin(filtro_categoria))]
 else:
-    df_filtrado = df_editado[df_editado['Regiao'].isin(filtro_regiao)]
+    df_filtrado = df_editado[(df_editado['Regiao'].isin(filtro_regiao)) & 
+                             (df_editado['Categoria'].isin(filtro_categoria))]
 
 
 # --- GRÁFICOS ---
@@ -100,8 +116,8 @@ if not df_filtrado.empty:
     col_kpi3.metric("Ticket Médio (Venda)", f"R$ {formata_br(df_filtrado['Vendas'].mean())}")
 st.divider()
 
-aba1, aba2, aba3, aba4, aba5, aba6, aba7, aba8 = st.tabs([
-    "📊 Colunas", "📈 Linhas", "🍕 Pizza", "🌌 Dispersão", "📦 Boxplot", "🔥 Heatmap", "📏 Histograma", "📚 Empilhadas"
+aba1, aba2, aba3, aba4, aba5, aba6, aba7, aba8, aba9 = st.tabs([
+    "📊 Colunas", "📈 Linhas", "🍕 Pizza", "🌌 Dispersão", "📦 Boxplot", "🔥 Heatmap", "📏 Histograma", "📚 Empilhadas", "📅 Anual"
 ])
 
 # Importante: A partir daqui, todos os gráficos usarão o 'df_filtrado' para respeitar o filtro da lateral.
@@ -142,8 +158,17 @@ with aba3:
 with aba4:
     st.write("### Relação: Custo x Vendas (Tamanho da bolha = Lucro)")
     if not df_filtrado.empty:
-        fig_scatter = px.scatter(df_filtrado, x='Custo', y='Vendas', color='Categoria', size='Lucro', hover_data=['Regiao'])
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        # Gráficos de bolha (size) quebram se receberem valores Vazios (NaN) ou negativos (anomalias).
+        # Criamos um DataFrame limpo só para esse gráfico, usando o valor absoluto do Lucro para o tamanho da bolha
+        df_plot = df_filtrado.dropna(subset=['Custo', 'Vendas', 'Lucro']).copy()
+        df_plot['Tamanho_Bolha'] = df_plot['Lucro'].abs()
+        
+        # Só tenta plotar se sobrar algum dado após a limpeza
+        if not df_plot.empty:
+            fig_scatter = px.scatter(df_plot, x='Custo', y='Vendas', color='Categoria', size='Tamanho_Bolha', hover_data=['Regiao', 'Lucro'])
+            st.plotly_chart(fig_scatter, use_container_width=True)
+        else:
+            st.warning("Sem dados numéricos válidos para montar a Dispersão neste período.")
 
 with aba5:
     st.write("### Distribuição Estatística do Lucro (Boxplot)")
@@ -187,5 +212,31 @@ with aba8:
         fig_stacked = px.bar(df_empilhado, x='Mes_Ano', y='Vendas', color='Categoria', text_auto='.0f')
         fig_stacked.update_xaxes(type='category')
         st.plotly_chart(fig_stacked, use_container_width=True)
+    else:
+        st.warning("Nenhum dado encontrado nesse período.")
+
+with aba9:
+    st.write("### Vendas por Ano")
+    st.write("Acompanhe a evolução do faturamento anual.")
+    if not df_filtrado.empty:
+        df_ano = df_filtrado.copy()
+        # Dropa possíveis NaNs nas datas antes de pegar o ano para evitar erros
+        df_ano = df_ano.dropna(subset=['Data'])
+        df_ano['Ano'] = df_ano['Data'].dt.year.astype(int).astype(str)
+        
+        # Botão interativo para a Rachel
+        empilhar = st.toggle("Detalhamento por Categoria (Barras Empilhadas)")
+        
+        if empilhar:
+            df_agrupado_ano = df_ano.groupby(['Ano', 'Categoria'], as_index=False)['Vendas'].sum()
+            # text_auto='.2s' formata os milhares com "k" (ex: 150k) para não encavalar o texto!
+            fig_ano = px.bar(df_agrupado_ano, x='Ano', y='Vendas', color='Categoria', text_auto='.2s', color_discrete_sequence=px.colors.qualitative.Pastel)
+        else:
+            df_agrupado_ano = df_ano.groupby('Ano', as_index=False)['Vendas'].sum()
+            fig_ano = px.bar(df_agrupado_ano, x='Ano', y='Vendas', text_auto='.2s', color='Ano', color_discrete_sequence=px.colors.sequential.Viridis)
+            fig_ano.update_layout(showlegend=False)
+            
+        fig_ano.update_xaxes(type='category') # Força o eixo a tratar anos como "Nomes" e não como números quebrados
+        st.plotly_chart(fig_ano, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")

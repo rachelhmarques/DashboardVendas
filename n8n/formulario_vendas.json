@@ -1,0 +1,89 @@
+{
+  "name": "Formulário de Vendas",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Registro de Venda",
+        "formDescription": "Preencha os dados da venda realizada.",
+        "formFields": {
+          "values": [
+            { "fieldLabel": "Data", "fieldType": "date", "requiredField": true },
+            {
+              "fieldLabel": "Categoria",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  { "option": "Roupas" },
+                  { "option": "Alimentos" },
+                  { "option": "Eletrônicos" },
+                  { "option": "Móveis" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Região",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  { "option": "Leste" },
+                  { "option": "Oeste" },
+                  { "option": "Norte" },
+                  { "option": "Sul" }
+                ]
+              }
+            },
+            { "fieldLabel": "Custo", "fieldType": "number", "requiredField": true },
+            { "fieldLabel": "Vendas", "fieldType": "number", "requiredField": true }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1f0c0de-0001-4000-8000-000000000001",
+      "name": "Formulário",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst custo = Number(j['Custo']);\nconst vendas = Number(j['Vendas']);\nconst data = new Date(j['Data']);\nconst erros = [];\n\nif (isNaN(data.getTime())) erros.push('Data inválida.');\nelse if (data.getFullYear() < 2000 || data > new Date()) erros.push('Data fora do intervalo permitido (2000 até hoje).');\nif (!(custo >= 0)) erros.push('Custo deve ser um número maior ou igual a zero.');\nif (!(vendas > 0)) erros.push('Vendas deve ser um número maior que zero.');\n\nif (erros.length) throw new Error('Registro recusado: ' + erros.join(' '));\n\nconst iso = data.toISOString().slice(0, 10);\nreturn [{ json: {\n  Data: iso,\n  Categoria: j['Categoria'],\n  Regiao: j['Região'],\n  Custo: Number(custo.toFixed(2)),\n  Vendas: Number(vendas.toFixed(2)),\n  Lucro: Number((vendas - custo).toFixed(2))\n}}];"
+      },
+      "id": "a1f0c0de-0002-4000-8000-000000000002",
+      "name": "Validar e calcular lucro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "COLE_AQUI_O_ID_DA_PLANILHA", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "vendas", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $json.Data }}",
+            "Categoria": "={{ $json.Categoria }}",
+            "Regiao": "={{ $json.Regiao }}",
+            "Custo": "={{ $json.Custo }}",
+            "Vendas": "={{ $json.Vendas }}",
+            "Lucro": "={{ $json.Lucro }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1f0c0de-0003-4000-8000-000000000003",
+      "name": "Gravar na aba vendas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "Formulário": { "main": [[{ "node": "Validar e calcular lucro", "type": "main", "index": 0 }]] },
+    "Validar e calcular lucro": { "main": [[{ "node": "Gravar na aba vendas", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
