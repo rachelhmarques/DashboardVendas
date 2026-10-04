@@ -209,17 +209,19 @@ with aba7:
         st.warning("Nenhum dado encontrado nesse período.")
 
 with aba8:
-    st.write("### Barras Empilhadas 100% (Market Share)")
-    st.write("Acompanhe o domínio de cada Categoria no faturamento ao longo do tempo.")
+    st.write("### Barras Empilhadas (Evolução Temporal)")
+    st.write("Acompanhe o volume de faturamento de cada Categoria ao longo do tempo.")
+    drill_down = st.radio("Agrupar por:", ["Por Ano", "Por Mês e Ano"], horizontal=True)
     if not df_filtrado.empty:
-        # Copia localmente e extrai mes-ano
         df_tmp = df_filtrado.copy()
-        df_tmp['Mes_Ano'] = df_tmp['Data'].dt.strftime('%m/%Y')
-        df_empilhado = df_tmp.groupby(['Mes_Ano', 'Categoria'], as_index=False)['Vendas'].sum()
+        if drill_down == "Por Ano":
+            df_tmp['EixoX'] = df_tmp['Data'].dt.strftime('%Y')
+        else:
+            df_tmp['EixoX'] = df_tmp['Data'].dt.strftime('%m/%Y')
+        df_empilhado = df_tmp.groupby(['EixoX', 'Categoria'], as_index=False)['Vendas'].sum()
         
-        # Para barras 100%, é legal usar barmode ou apenas stack (padrão)
-        fig_stacked = px.bar(df_empilhado, x='Mes_Ano', y='Vendas', color='Categoria', text_auto='.0f')
-        fig_stacked.update_xaxes(type='category')
+        fig_stacked = px.bar(df_empilhado, x='EixoX', y='Vendas', color='Categoria', text_auto='.2s')
+        fig_stacked.update_xaxes(type='category', title_text="Período")
         st.plotly_chart(fig_stacked, use_container_width=True)
     else:
         st.warning("Nenhum dado encontrado nesse período.")
