@@ -17,8 +17,13 @@ st.sidebar.markdown("Use as opções abaixo para interagir com os gráficos.")
 from dotenv import load_dotenv
 load_dotenv()
 
-URL_API = os.getenv("URL_API")
-TOKEN = os.getenv("API_TOKEN")
+URL_API = os.getenv('URL_API') or os.getenv('APPS_SCRIPT_URL')
+TOKEN = os.getenv('API_TOKEN') or os.getenv('APPS_SCRIPT_TOKEN')
+try:
+    if not URL_API: URL_API = st.secrets.get('URL_API') or st.secrets.get('APPS_SCRIPT_URL')
+    if not TOKEN: TOKEN = st.secrets.get('API_TOKEN') or st.secrets.get('APPS_SCRIPT_TOKEN')
+except:
+    pass
 
 @st.cache_data(ttl=60) # Faz cache de 1 minuto para não bombardear o Google
 def carregar_dados_da_api():
