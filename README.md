@@ -18,7 +18,7 @@ O projeto adota uma arquitetura em microsserviços (Serverless) baseada em event
 ### 2. Backend & Segurança (`/AppsScript`)
 - **API RESTful:** Funções em JavaScript hospedadas nativamente no Google Cloud (Apps Script), atuando como ponte segura para os clientes consumirem os dados da planilha.
 - **RLS (Row Level Security):** Algoritmos de segurança (`AuthBackend.js`) protegem os dados por nível de região geográfica (Norte, Sul, Leste, Oeste), garantindo que os usuários só visualizem o que têm permissão.
-- **Inteligência Artificial (Llama 3):** Conexão assíncrona com o LLM da Meta via API `Groq`, respondendo a análises financeiras complexas diretamente pelo Telegram (`TelegramBackend.js`) ou pelo Web App.
+- **Inteligência Artificial (Gemini & OpenRouter):** Conexão assíncrona com o LLM do Google via API AI Studio (Gemini 2.5 Flash nativo) com fallback programado para a API OpenRouter, respondendo a análises financeiras complexas diretamente pelo Telegram (TelegramBackend.js) ou pelo Web App. (Obtenha sua chave gratuita do AI Studio em: [Google AI Studio](https://aistudio.google.com/prompts/new_chat))
 
 ### 3. Frontend Analítico Principal (`app_vendas.py`)
 - Desenvolvido inteiramente em Python (`Streamlit`).
