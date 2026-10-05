@@ -64,7 +64,7 @@ function consultarGroq(pergunta, usuarioAtivo) {
       var debugStr = "DEBUG - DADOS:\n" + csvPronto;
       return debugStr.length > 3500 ? debugStr.substring(0, 3500) + "\n...(cortado devido ao limite do Telegram)" : debugStr;
     }
-            var chaveOpenRouter = PropertiesService.getScriptProperties().getProperty("OPENROUTER_API_KEY");
+                var chaveOpenRouter = PropertiesService.getScriptProperties().getProperty("OPENROUTER_API_KEY");
     if (!chaveOpenRouter) return "Erro: Chave OPENROUTER_API_KEY não foi encontrada nas Propriedades do Script.";
 
     var mensagensOR = [
@@ -73,8 +73,8 @@ function consultarGroq(pergunta, usuarioAtivo) {
     ];
     var urlOR = "https://openrouter.ai/api/v1/chat/completions";
     var listaModelos = [
-      "qwen/qwen3-14b",
-      "xiaomi/mimo-v2.6-flash"
+      "inclusionai/ling-3.1-flash",
+      "openai/gpt-oss-20b"
     ];
 
     var erroFinal = "";
