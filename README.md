@@ -1,4 +1,4 @@
-# 📊 Projeto TCC: Sistema Integrado de Dashboard de Vendas (Cloud Analytics)
+# 📊 Sistema Integrado de Dashboard de Vendas (Cloud Analytics)
 
 **Autor:** Rachel H. Marques
 
