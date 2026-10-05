@@ -64,39 +64,38 @@ function consultarGroq(pergunta, usuarioAtivo) {
       var debugStr = "DEBUG - DADOS:\n" + csvPronto;
       return debugStr.length > 3500 ? debugStr.substring(0, 3500) + "\n...(cortado devido ao limite do Telegram)" : debugStr;
     }
-        var chaveGroq = PropertiesService.getScriptProperties().getProperty("GROQ_API_KEY");
-    if (!chaveGroq) return "Erro: Chave GROQ_API_KEY não foi encontrada nas Propriedades do Script.";
+            var chaveOpenRouter = PropertiesService.getScriptProperties().getProperty("OPENROUTER_API_KEY");
+    if (!chaveOpenRouter) return "Erro: Chave OPENROUTER_API_KEY não foi encontrada nas Propriedades do Script.";
 
-    var mensagensGroq = [
+    var mensagensOR = [
       {"role": "system", "content": promptSistema},
       {"role": "user", "content": pergunta}
     ];
-    var urlGroq = "https://api.groq.com/openai/v1/chat/completions";
+    var urlOR = "https://openrouter.ai/api/v1/chat/completions";
     var listaModelos = [
-      "llama-3.3-70b-versatile",
-      "mixtral-8x7b-32768",
-      "llama-3.1-8b-instant"
+      "qwen/qwen3-14b",
+      "xiaomi/mimo-v2.6-flash"
     ];
 
     var erroFinal = "";
     for (var m = 0; m < listaModelos.length; m++) {
-      var payloadGroq = {"model": listaModelos[m], "messages": mensagensGroq, "temperature": 0.2};
-      var optionsGroq = {"method": "post", "headers": {"Authorization": "Bearer " + chaveGroq, "Content-Type": "application/json"}, "payload": JSON.stringify(payloadGroq), "muteHttpExceptions": true};
+      var payloadOR = {"model": listaModelos[m], "messages": mensagensOR, "temperature": 0.2};
+      var optionsOR = {"method": "post", "headers": {"Authorization": "Bearer " + chaveOpenRouter, "HTTP-Referer": "https://script.google.com/", "X-Title": "DashboardVendas", "Content-Type": "application/json"}, "payload": JSON.stringify(payloadOR), "muteHttpExceptions": true};
       try {
-        var resGroq = UrlFetchApp.fetch(urlGroq, optionsGroq);
-        var codGroq = resGroq.getResponseCode();
-        var corpGroq = JSON.parse(resGroq.getContentText());
-        if (codGroq === 200 && corpGroq.choices && corpGroq.choices.length > 0) {
-          return corpGroq.choices[0].message.content;
+        var resOR = UrlFetchApp.fetch(urlOR, optionsOR);
+        var codOR = resOR.getResponseCode();
+        var corpOR = JSON.parse(resOR.getContentText());
+        if (codOR === 200 && corpOR.choices && corpOR.choices.length > 0) {
+          return corpOR.choices[0].message.content;
         } else {
-          erroFinal += listaModelos[m] + " Erro " + codGroq + " | ";
+          erroFinal += listaModelos[m] + " Erro " + codOR + " | ";
         }
       } catch(e) {
         erroFinal += listaModelos[m] + " Exception: " + e.message + " | ";
       }
     }
     
-    return "Todos os modelos falharam na Groq. Erros: " + erroFinal;
+    return "Todos os modelos falharam na OpenRouter. Erros: " + erroFinal;
   } catch (e) {
     return "Falha interna no Assistente IA: " + e.message;
   }
