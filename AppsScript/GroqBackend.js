@@ -49,6 +49,7 @@ function consultarGroq(pergunta, usuarioAtivo) {
     // 3. Prompt Base
     var dataAtual = new Date().toLocaleDateString("pt-BR");
     var promptSistema = "Você é um Analista de BI sênior de uma empresa. O usuário está vendo um Dashboard de Vendas.\n";
+    promptSistema += "ATENÇÃO: A moeda OFICIAL da empresa é o Real Brasileiro (R$). NUNCA use Euros ou Dólares.\n";
     promptSistema += "A data de hoje é: " + dataAtual + ".\n";
     promptSistema += "Abaixo estão os dados reais da base (formato CSV separado por ';'), já filtrados pela regra de acesso dele (RLS).\n";
     promptSistema += "ATENÇÃO: Todas as datas na coluna 'Data' do CSV estão no formato brasileiro (DD/MM/AAAA).\n";

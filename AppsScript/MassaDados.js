@@ -1,14 +1,4 @@
-/**
- * ============================================================================
- * PROJETO TCC: Módulo de Back-end (Google Apps Script)
- * ARQUIVO: MassaDados.js
- * AUTORIA: Rachel H. Marques
- * DESCRIÇÃO: Componente servidor responsável por regras de negócios, segurança,
- * injeção de dados ou integrações de IA.
- * ============================================================================
- */
-
-function gerarMassaDados2023_2026() {
+function gerarMassaDados2024_2026() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("vendas") || ss.getSheets()[0];
   if (!sheet) return;
@@ -26,11 +16,11 @@ function gerarMassaDados2023_2026() {
   var categorias = ["Eletrônicos", "Móveis", "Alimentos", "Roupas"];
   
   var novasLinhas = [];
-  var start = new Date(2023, 0, 1).getTime(); 
+  var start = new Date(2024, 0, 1).getTime(); 
   var end = new Date(2026, 11, 31).getTime(); 
   
   // GERANDO OS 2000 DADOS ALEATÓRIOS
-  for (var i = 0; i < 2000; i++) {
+  for (var i = 0; i < 300; i++) {
     var dtTime = new Date(start + Math.random() * (end - start));
     var ano = dtTime.getFullYear();
     var mes = ("0" + (dtTime.getMonth() + 1)).slice(-2);

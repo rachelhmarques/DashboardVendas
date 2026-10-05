@@ -1,13 +1,3 @@
-/**
- * ============================================================================
- * PROJETO TCC: Módulo de Back-end (Google Apps Script)
- * ARQUIVO: MenuPlanilha.js
- * AUTORIA: Rachel H. Marques
- * DESCRIÇÃO: Componente servidor responsável por regras de negócios, segurança,
- * injeção de dados ou integrações de IA.
- * ============================================================================
- */
-
 function FORCAR_CRIACAO_DO_MENU() {
   // Limpa qualquer gatilho antigo para evitar menus duplicados
   var triggers = ScriptApp.getProjectTriggers();
@@ -38,6 +28,6 @@ function meuMenuSeguro() {
       .addSeparator()
       .addItem('📩 Processar Envios Manuais Agora', 'verificarEnvioPDFs')
       .addSeparator()
-      .addItem('🎲 Gerar Massa de Dados (2023-2026)', 'gerarMassaDados2023_2026')
+      .addItem('🎲 Gerar Massa de Dados (2024-2026)', 'gerarMassaDados2024_2026')
       .addToUi();
 }
