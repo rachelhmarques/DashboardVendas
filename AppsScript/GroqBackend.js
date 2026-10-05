@@ -73,9 +73,9 @@ function consultarGroq(pergunta, usuarioAtivo) {
     ];
     var urlGroq = "https://api.groq.com/openai/v1/chat/completions";
     var listaModelos = [
-      "llama3-70b-8192",
+      "llama-3.3-70b-versatile",
       "mixtral-8x7b-32768",
-      "gemma2-9b-it"
+      "llama-3.1-8b-instant"
     ];
 
     var erroFinal = "";
