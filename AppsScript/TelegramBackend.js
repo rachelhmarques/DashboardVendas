@@ -1,15 +1,5 @@
-/**
- * ============================================================================
- * PROJETO TCC: Módulo de Back-end (Google Apps Script)
- * ARQUIVO: TelegramBackend.js
- * AUTORIA: Rachel H. Marques
- * DESCRIÇÃO: Componente servidor responsável por regras de negócios, segurança,
- * injeção de dados ou integrações de IA.
- * ============================================================================
- */
-
-// O token foi injetado diretamente aqui para evitar problemas com as Propriedades de Script
-var TELEGRAM_TOKEN = "8810939791:AAFZLP-Dkd5zC9XZbs_HgKXBd0CAS-XlplI";
+// O token agora é lido de forma segura das Propriedades do Script
+var TELEGRAM_TOKEN = PropertiesService.getScriptProperties().getProperty("TELEGRAM_TOKEN");
 var TELEGRAM_URL = "https://api.telegram.org/bot" + TELEGRAM_TOKEN;
 
 // Rode essa função UMA VEZ no editor do Apps Script para ligar o Telegram ao seu código
