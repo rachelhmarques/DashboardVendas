@@ -52,7 +52,7 @@ function doPost(e) {
       enviarMensagemTelegram(chatId, "🎧 Ouvindo seu áudio... só um segundo!");
       
       try {
-        textoDigitado = transcreverAudioNaOpenRouter(voiceMessage.file_id);
+        textoDigitado = transcreverAudioNoGroq(voiceMessage.file_id);
       } catch(err) {
         enviarMensagemTelegram(chatId, "Erro na tradução do áudio: " + err.message);
         return HtmlService.createHtmlOutput("OK");
@@ -131,46 +131,45 @@ function enviarFotoTelegram(chatId, photoUrl) {
   UrlFetchApp.fetch(TELEGRAM_URL + "/sendPhoto", options);
 }
 
-function transcreverAudioNaOpenRouter(fileId) {
-  var chaveApi = PropertiesService.getScriptProperties().getProperty("OPENROUTER_API_KEY");
-  if (!chaveApi) throw new Error("Chave OPENROUTER_API_KEY não encontrada.");
-
-  // 1. Descobrir o path no Telegram
-  var fileResp = UrlFetchApp.fetch(TELEGRAM_URL + "/getFile?file_id=" + fileId);
-  var filePath = JSON.parse(fileResp.getContentText()).result.file_path;
+function transcreverAudioNoGroq(fileId) {
+    var chaveApi = PropertiesService.getScriptProperties().getProperty("GROQ_API_KEY");
+    if (!chaveApi) throw new Error("Chave GROQ_API_KEY não encontrada nas Propriedades do Script.");
   
-  // 2. Baixar o arquivo de áudio (OGG Opus)
-  var audioBlob = UrlFetchApp.fetch("https://api.telegram.org/file/bot" + TELEGRAM_TOKEN + "/" + filePath).getBlob();
-  audioBlob.setName("audio.ogg"); // IMPORTANTE para o backend da API interpretar o mime type
-  
-  // 3. Montar chamada multipart para o endpoint de áudio da OpenRouter
-  var payload = {
-    "file": audioBlob,
-    "model": "openai/whisper-large-v3" // Modelo que aparece na screenshot
-  };
-  
-  var options = {
-    "method": "post",
-    "headers": {
-      "Authorization": "Bearer " + chaveApi,
-      "HTTP-Referer": "https://script.google.com/"
-    },
-    "payload": payload,
-    "muteHttpExceptions": true
-  };
-  
-  var response = UrlFetchApp.fetch("https://openrouter.ai/api/v1/audio/transcriptions", options);
-  var code = response.getResponseCode();
-  var body = response.getContentText();
-  
-  if (code !== 200) {
-    throw new Error("Erro na API (" + code + "): " + body);
-  }
-  
-  var resObj = JSON.parse(body);
-  if (resObj.text) {
-    return resObj.text;
-  } else {
-    throw new Error("Sem transcrição: " + body);
-  }
+    // 1. Descobrir o path no Telegram
+    var fileResp = UrlFetchApp.fetch(TELEGRAM_URL + "/getFile?file_id=" + fileId);
+    var filePath = JSON.parse(fileResp.getContentText()).result.file_path;
+    
+    // 2. Baixar o arquivo de áudio (OGG Opus)
+    var audioBlob = UrlFetchApp.fetch("https://api.telegram.org/file/bot" + TELEGRAM_TOKEN + "/" + filePath).getBlob();
+    audioBlob.setName("audio.ogg"); // IMPORTANTE para o backend da API interpretar o mime type
+    
+    // 3. Montar chamada multipart para o endpoint de áudio da Groq
+    var payload = {
+      "file": audioBlob,
+      "model": "whisper-large-v3" // Modelo Whisper na Groq
+    };
+    
+    var options = {
+      "method": "post",
+      "headers": {
+        "Authorization": "Bearer " + chaveApi
+      },
+      "payload": payload,
+      "muteHttpExceptions": true
+    };
+    
+    var response = UrlFetchApp.fetch("https://api.groq.com/openai/v1/audio/transcriptions", options);
+    var code = response.getResponseCode();
+    var body = response.getContentText();
+    
+    if (code !== 200) {
+      throw new Error("Erro na Groq (" + code + "): " + body);
+    }
+    
+    var resObj = JSON.parse(body);
+    if (resObj.text) {
+      return resObj.text;
+    } else {
+      throw new Error("Sem transcrição: " + body);
+    }
 }
