@@ -73,8 +73,8 @@ function consultarGroq(pergunta, usuarioAtivo) {
     ];
     var urlOR = "https://openrouter.ai/api/v1/chat/completions";
     var listaModelos = [
-      "inclusionai/ling-3.1-flash",
-      "openai/gpt-oss-20b"
+      "qwen/qwen3-14b",
+      "xiaomi/mimo-v2.6-flash"
     ];
 
     var erroFinal = "";
