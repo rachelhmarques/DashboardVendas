@@ -114,7 +114,12 @@ function enviarMensagemTelegram(chatId, texto) {
     "payload": JSON.stringify(payload),
     "muteHttpExceptions": true
   };
-  UrlFetchApp.fetch(TELEGRAM_URL + "/sendMessage", options);
+  var resp = UrlFetchApp.fetch(TELEGRAM_URL + "/sendMessage", options);
+  if (resp.getResponseCode() !== 200) {
+    delete payload.parse_mode;
+    options.payload = JSON.stringify(payload);
+    UrlFetchApp.fetch(TELEGRAM_URL + "/sendMessage", options);
+  }
 }
 
 function enviarFotoTelegram(chatId, photoUrl) {
