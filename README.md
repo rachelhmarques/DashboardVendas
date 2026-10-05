@@ -44,3 +44,31 @@ O projeto adota uma arquitetura em microsserviços (Serverless) baseada em event
 
 ---
 *Este código não contém chaves de API vivas ou segredos (`.env` está ignorado). Todo o sistema pode ser replicado mediante a configuração do banco de dados na aba `n8n` e implantação no Apps Script.*
+
+## 📥 Como Baixar o Projeto (Para Avaliadores e Colegas)
+
+Para inspecionar os arquivos ou rodar o projeto na sua máquina, você pode clonar este repositório de três formas fáceis:
+
+### Opção 1: Usando o VS Code (Visual Studio Code)
+1. Abra o **VS Code**.
+2. Pressione `Ctrl + Shift + P` para abrir a Paleta de Comandos.
+3. Digite **Git: Clone** e pressione `Enter`.
+4. Cole a URL do projeto:
+   `https://github.com/rachelhmarques/DashboardVendas.git`
+5. Escolha a pasta onde deseja salvar e abra o projeto.
+6. Use o terminal do VS Code (`Ctrl + '`) para instalar as dependências.
+
+### Opção 2: Pelo Jupyter Notebook / Google Colab
+Se você quiser analisar os dados ou brincar com o código Python de forma interativa:
+1. Abra o **Jupyter Notebook** no seu computador (ou o Google Colab no navegador).
+2. Em uma célula vazia, digite e execute o seguinte comando:
+   ```python
+   !git clone https://github.com/rachelhmarques/DashboardVendas.git
+   ```
+3. Todos os arquivos e as pastas do projeto (como `/AppsScript`) vão aparecer imediatamente na sua aba lateral de arquivos para você explorar.
+
+### Opção 3: Download Direto (Sem Instalar Nada)
+1. Vá no topo da página deste repositório no GitHub.
+2. Clique no botão verde **"<> Code"**.
+3. Escolha **"Download ZIP"**.
+4. Extraia a pasta no seu computador e abra com qualquer editor.
