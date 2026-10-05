@@ -2,7 +2,7 @@
 
 **Autor:** Rachel H. Marques
 
-Este repositório contém a base de código integral de um ecossistema completo de captação, tratamento e visualização de dados operacionais e financeiros em nuvem, construído como Trabalho de Conclusão de Curso.
+Este repositório contém a base de código integral de um ecossistema completo de captação, tratamento e visualização de dados operacionais e financeiros em nuvem.
 
 ## 🏗️ Arquitetura do Sistema
 
