@@ -119,7 +119,7 @@ function consultarGroq(pergunta, usuarioAtivo) {
         var codOR = resOR.getResponseCode();
         var corpOR = JSON.parse(resOR.getContentText());
         if (codOR === 200 && corpOR.choices && corpOR.choices.length > 0) {
-          return corpOR.choices[0].message.content + "\n\n*(Debug: Respondido via Fallback OpenRouter. Erro original: " + erroFinal + ")*";
+          return corpOR.choices[0].message.content;
         } else {
           erroFinal += listaModelos[m] + " Erro " + codOR + " | ";
         }
