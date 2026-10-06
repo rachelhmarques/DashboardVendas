@@ -19,6 +19,7 @@ O projeto adota uma arquitetura em microsserviços (Serverless) baseada em event
 - **API RESTful:** Funções em JavaScript hospedadas nativamente no Google Cloud (Apps Script), atuando como ponte segura para os clientes consumirem os dados da planilha.
 - **RLS (Row Level Security):** Algoritmos de segurança (`AuthBackend.js`) protegem os dados por nível de região geográfica (Norte, Sul, Leste, Oeste), garantindo que os usuários só visualizem o que têm permissão.
 - **Inteligência Artificial (Gemini & OpenRouter):** Conexão assíncrona com o LLM do Google via API AI Studio (Gemini 2.5 Flash nativo) com fallback programado para a API OpenRouter, respondendo a análises financeiras complexas diretamente pelo Telegram (TelegramBackend.js) ou pelo Web App. (Obtenha sua chave gratuita do AI Studio em: [Google AI Studio](https://aistudio.google.com/prompts/new_chat))
+- **Prompt de exemplo:** Use o [modelo de prompt para solicitar automações no Google Apps Script](prompts/prompt-google-apps-script.md) como guia. Substitua os campos entre colchetes pelos detalhes da sua planilha e da tarefa.
 
 ### 3. Frontend Analítico Principal (`app_vendas.py`)
 - Desenvolvido inteiramente em Python (`Streamlit`).
